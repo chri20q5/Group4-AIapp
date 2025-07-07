@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Job Application Dashboard</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f1ebf8; /* light lilac */
+            color: #3b3b3b;
+            margin: 0;
+            padding: 2rem;
+        }
+        h1 {
+            color: #6a4caf; /* soft purple */
+            margin-bottom: 1rem;
+        }
+        .section {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border: 1px solid #d6d3e0;
+        }
+        button {
+            background-color: #6a4caf;
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 0.5rem;
+        }
+        button:hover {
+            background-color: #5a3c9a;
+        }
+        input, textarea {
+            width: 100%;
+            margin-top: 0.5rem;
+            padding: 0.6rem;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-size: 1rem;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+        li {
+            background-color: #e7f6ed; /* cold green */
+            padding: 0.75rem;
+            border-radius: 6px;
+            margin-top: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+<h1>Job Application Dashboard</h1>
+
+<div class="section">
+    <h2>Login</h2>
+    <input type="email" placeholder="Email">
+    <input type="password" placeholder="Password">
+    <button>Log In</button>
+</div>
+
+<div class="section">
+    <h2>Upload Resume</h2>
+    <input type="file">
+</div>
+
+<div class="section">
+    <h2>Find Jobs</h2>
+    <button>Fetch Job Listings</button>
+    <ul>
+        <li>Frontend Developer - Berlin <button>Generate</button></li>
+        <li>Cloud Engineer - Remote <button>Generate</button></li>
+    </ul>
+</div>
+
+<div class="section">
+    <h2>Cover Letter Preview</h2>
+    <textarea rows="8">Dear Hiring Team,...</textarea>
+    <button>Send Application</button>
+</div>
+</body>
+</html>
