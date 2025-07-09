@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Dashboard - AutoJob</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            background: #f6f0fb;
+            font-family: 'Segoe UI', sans-serif;
+            color: #444;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #bba4e3;
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            margin-left: 1.5rem;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+
+        .nav-links a:hover {
+            text-decoration: underline;
+        }
+
+        .container {
+            padding: 2rem;
+            max-width: 800px;
+            margin: auto;
+        }
+
+        .card {
+            background: white;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        h2 {
+            color: #7d5ba6;
+        }
+
+        button {
+            background-color: #bba4e3;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            margin-top: 0.5rem;
+            cursor: pointer;
+        }
+
+        .job-card {
+            background: #f8f4ff;
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+        }
+
+        .job-meta {
+            font-size: 0.9rem; /* fixed typo: was "front-size" */
+            color: #777;
+        }
+
+        .job-card p {
+            font-size: 0.9rem;
+            margin: 0.5rem 0 0.5rem 0;
+        }
+
+        .applied-card {
+            background: #eef0f7;
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        }
+
+        .status {
+            float: right;
+            font-size: 0.85rem; /* fixed typo: was "front-size" */
+            padding: 0.3rem 0.7rem;
+            border-radius: 8px;
+            font-weight: bold; /* fixed typo: was "front-weight" */
+        }
+
+        .status.sent {
+            background: #cdb4f5;
+            color: #fff;
+        }
+
+        .status.waiting {
+            background: #98d6bd;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <div><strong>AutoJob</strong></div>
+    <div class="nav-links">
+        <a href="dashboard.html">Dashboard</a>
+        <a href="settings.html">Settings</a>
+        <a href="home.html">Logout</a>
+    </div>
+</header>
+
+<div class="container">
+    <div class="card">
+        <h2>Job Listings</h2>
+
+        <div class="job-card">
+            <div>
+                <strong>Frontend Developer</strong><br>
+                <span class="job-meta">Berlin · Full-Time</span>
+                <p>Build beautiful, responsive web interfaces for top clients in Europe using React and modern tools.</p>
+                <a href="preview.html"><button>Apply</button></a>
+            </div>
+        </div>
+
+        <div class="job-card">
+            <div>
+                <strong>Cloud Engineer</strong><br>
+                <span class="job-meta">Remote · Contract</span>
+                <p>Design, deploy, and maintain scalable cloud infrastructures on Azure and AWS for global projects.</p>
+                <a href="preview.html"><button>Apply</button></a>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="card">
+        <h2>Applied Jobs</h2>
+        <div class="applied-card">
+            <div>
+                <strong>UI Designer</strong>
+                <span class="status sent">Sent</span>
+            </div>
+        </div>
+        <div class="applied-card">
+            <div>
+                <strong>Security Analyst</strong>
+                <span class="status waiting">Awaiting Response</span>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

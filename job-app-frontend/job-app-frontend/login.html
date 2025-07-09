@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Login - AutoJob</title>
+    <link rel="stylesheet" href="style.css" />
+    <style>
+        body {
+            background: #f6f0fb;
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #444;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .container {
+            max-width: 400px;
+            width: 90%;
+            padding: 2rem;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+            text-align: center;
+        }
+
+        h2 {
+            color: #7d5ba6;
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-top: 1rem;
+            text-align: left;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.6rem;
+            margin-top: 0.3rem;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+        }
+
+        .button {
+            display: inline-block;
+            background: #bba4e3;
+            color: white;
+            padding: 0.6rem 1.2rem;
+            border-radius: 10px;
+            text-decoration: none;
+            margin-top: 1.5rem;
+        }
+
+        .back-link {
+            display: block;
+            margin-top: 1rem;
+            text-decoration: none;
+            color: #6a4caf;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Login to AutoJob</h2>
+    <label for="email">Email</label>
+    <input type="email" id="email" placeholder="you@example.com" />
+
+    <label for="password">Password</label>
+    <input type="password" id="password" placeholder="Enter your password" />
+
+    <br />
+    <a class="button" href="dashboard.html">Login</a>
+    <a class="back-link" href="home.html">⬅ Back to Home</a>
+</div>
+</body>
+</html>

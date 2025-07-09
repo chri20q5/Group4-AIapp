@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Welcome to AutoJob</title>
+    <link rel="stylesheet" href="style.css" />
+    <style>
+        body {
+            background: #f6f0fb;
+            font-family: 'Segoe UI', sans-serif;
+            color: #444;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .card {
+            background: white;
+            padding: 3rem 2rem;
+            border-radius: 16px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+
+        h1 {
+            color: #7d5ba6;
+            font-size: 2.3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        p {
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+        }
+
+        .button {
+            background: #bba4e3;
+            color: white;
+            font-weight: bold;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            text-decoration: none;
+        }
+
+        .button:hover {
+            background: #a68bd2;
+        }
+
+        footer {
+            margin-top: 3rem;
+            font-size: 0.9rem;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="card">
+        <h1>Welcome to AutoJob</h1>
+        <p>Your place to apply smarter — generate cover letters, track your applications, and automate your job hunt in style.</p>
+        <div class="buttons">
+            <a class="button" href="login.html">Login</a>
+            <a class="button" href="register.html">Register</a>
+        </div>
+    </div>
+    <footer>
+        Built with purpose · Spring Edition UI
+    </footer>
+</div>
+</body>
+</html>

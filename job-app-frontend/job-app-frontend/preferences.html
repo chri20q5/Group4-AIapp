@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Job Preferences - AutoJob</title>
+    <link rel="stylesheet" href="style.css" />
+    <style>
+        body {
+            background: #f6f0fb;
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #444;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 4rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        h2 {
+            color: #7d5ba6;
+            margin-bottom: 1rem;
+        }
+
+        label {
+            display: block;
+            margin-top: 1rem;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.6rem;
+            margin-top: 0.3rem;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+        }
+
+        .button {
+            display: inline-block;
+            background: #bba4e3;
+            color: white;
+            padding: 0.6rem 1.2rem;
+            border-radius: 10px;
+            text-decoration: none;
+            margin-top: 2rem;
+            margin-right: 1rem;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Job Preferences</h2>
+    <label for="role">Desired Roles</label>
+    <input type="text" id="role" placeholder="Frontend Developer, Cloud Engineer" />
+
+    <label for="industry">Preferred Industry</label>
+    <input type="text" id="industry" placeholder="Tech, Finance, Health" />
+
+    <label for="location">Preferred Location</label>
+    <input type="text" id="location" placeholder="Berlin, Remote, Europe" />
+
+    <a class="button" href="#">Save Preferences</a>
+    <a class="button" href="profile.html">⬅ Back to Profile</a>
+</div>
+</body>
+</html>
