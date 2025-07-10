@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Login - AutoJob</title>
+    <link rel="stylesheet" href="style.css" />
+    <style>
+        body {
+            background: #f6f0fb;
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #444;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .container {
+            max-width: 400px;
+            width: 90%;
+            padding: 2rem;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+            text-align: center;
+        }
+
+        h2 {
+            color: #7d5ba6;
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-top: 1rem;
+            text-align: left;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.6rem;
+            margin-top: 0.3rem;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+        }
+
+        .button {
+            display: inline-block;
+            background: #bba4e3;
+            color: white;
+            padding: 0.6rem 1.2rem;
+            border-radius: 10px;
+            text-decoration: none;
+            margin-top: 1.5rem;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
+        }
+
+        .button:hover {
+            background: #a084d6;
+        }
+
+        .button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .back-link {
+            display: block;
+            margin-top: 1rem;
+            text-decoration: none;
+            color: #6a4caf;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Login to AutoJob</h2>
+    <label for="email">Email</label>
+    <input type="email" id="email" placeholder="you@example.com" />
+
+    <label for="password">Password</label>
+    <input type="password" id="password" placeholder="Enter your password" />
+
+    <br />
+    <button class="button" onclick="handleLogin()">Login</button>
+    <div id="error-message" style="color: red; margin-top: 1rem; display: none;"></div>
+    <div id="loading" style="margin-top: 1rem; display: none;">Logging in...</div>
+    <a class="back-link" href="home.html">⬅ Back to Home</a>
+</div>
+
+<script src="auth.js"></script>
+<script>
+async function handleLogin() {
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const errorDiv = document.getElementById('error-message');
+    const loadingDiv = document.getElementById('loading');
+    
+    // Clear previous errors
+    errorDiv.style.display = 'none';
+    
+    // Validate input
+    if (!email || !password) {
+        showError('Please enter both email and password.');
+        return;
+    }
+    
+    // Show loading
+    loadingDiv.style.display = 'block';
+    
+    try {
+        const response = await fetch(API_ENDPOINTS.login, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                email: email,
+                password: password
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok && result.success) {
+            // Store the JWT token and user info
+            AuthManager.setAuthData(result.token, result.user);
+            
+            // Redirect to dashboard
+            window.location.href = 'dashboard.html';
+        } else {
+            showError(result.message || 'Login failed. Please try again.');
+        }
+    } catch (error) {
+        showError('Network error. Please check your connection and try again.');
+        console.error('Login error:', error);
+    } finally {
+        loadingDiv.style.display = 'none';
+    }
+}
+
+function showError(message) {
+    const errorDiv = document.getElementById('error-message');
+    errorDiv.textContent = message;
+    errorDiv.style.display = 'block';
+}
+
+// Allow Enter key to submit
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('password').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            handleLogin();
+        }
+    });
+});
+</script>
+</body>
+</html>

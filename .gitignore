@@ -1,0 +1,49 @@
+# Sensitive files
+local.settings.json
+local.settings.production.json
+.env
+*.env
+
+# Archive and development files
+archive-dev-files/
+
+# Build outputs and dependencies
+bin/
+obj/
+node_modules/
+packages/
+*.log
+
+# IDE and editor files
+.vs/
+.vscode/settings.json
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Deployment artifacts
+*.zip
+publish/
+
+# Temporary files
+*.tmp
+*.temp
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Azure Functions
+local.settings.json
+*.azurepubxml
+.azure/
+
+# Test outputs
+TestResults/
+coverage/

@@ -1,0 +1,30 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "environmentName": {
+      "value": "${AZURE_ENV_NAME}"
+    },
+    "location": {
+      "value": "${AZURE_LOCATION}"
+    },
+    "apiKey": {
+      "value": "${API_KEY}"
+    },
+    "apiUrl": {
+      "value": "${API_URL}"
+    },
+    "modelName": {
+      "value": "${MODEL_NAME}"
+    },
+    "databaseConnectionString": {
+      "value": "${DATABASE_CONNECTION_STRING}"
+    },
+    "jwtSecret": {
+      "value": "${JWT_SECRET}"
+    },
+    "jwtIssuer": {
+      "value": "${JWT_ISSUER}"
+    }
+  }
+}

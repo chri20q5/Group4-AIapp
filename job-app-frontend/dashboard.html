@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Dashboard - AutoJob</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="config.js"></script>
+    <script src="app.js"></script>
+    <style>
+        body {
+            background: #f6f0fb;
+            font-family: 'Segoe UI', sans-serif;
+            color: #444;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #bba4e3;
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            margin-left: 1.5rem;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+
+        .nav-links a:hover {
+            text-decoration: underline;
+        }
+
+        .container {
+            padding: 2rem;
+            max-width: 800px;
+            margin: auto;
+        }
+
+        .card {
+            background: white;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        h2 {
+            color: #7d5ba6;
+        }
+
+        button {
+            background-color: #bba4e3;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            margin-top: 0.5rem;
+            cursor: pointer;
+        }
+
+        .job-card {
+            background: #f8f4ff;
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+        }
+
+        .job-meta {
+            font-size: 0.9rem; /* fixed typo: was "front-size" */
+            color: #777;
+        }
+
+        .job-card p {
+            font-size: 0.9rem;
+            margin: 0.5rem 0 0.5rem 0;
+        }
+
+        .applied-card {
+            background: #eef0f7;
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        }
+
+        .status {
+            float: right;
+            font-size: 0.85rem; /* fixed typo: was "front-size" */
+            padding: 0.3rem 0.7rem;
+            border-radius: 8px;
+            font-weight: bold; /* fixed typo: was "front-weight" */
+        }
+
+        .status.sent {
+            background: #cdb4f5;
+            color: #fff;
+        }
+
+        .button, .apply-btn {
+            background: #bba4e3;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin: 0.5rem 0;
+        }
+
+        .button:hover, .apply-btn:hover {
+            background: #a68bd2;
+        }
+
+        .load-more-btn {
+            text-align: center;
+            margin: 1.5rem 0;
+        }
+
+        .load-more-button {
+            background-color: #bba4e3;
+            color: white;
+            padding: 0.75rem 2rem;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+
+        .load-more-button:hover {
+            background-color: #a693d8;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <div><strong>AutoJob</strong></div>
+    <div class="nav-links">
+        <a href="dashboard.html">Dashboard</a>
+        <a href="profile.html">Profile</a>
+        <a href="settings.html">Settings</a>
+        <a href="#" onclick="handleLogout()">Logout</a>
+    </div>
+</header>
+
+<div class="container">
+    <div class="card">
+        <h2>Job Listings</h2>
+        <div id="job-listings">
+            <!-- Jobs will be loaded dynamically -->
+            <div style="text-align: center; padding: 2rem;">
+                <p>Loading job listings...</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Applied Jobs</h2>
+        <div id="applied-jobs">
+            <!-- Applied jobs will be loaded dynamically -->
+            <div style="text-align: center; padding: 2rem;">
+                <p>Loading your applications...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="auth.js"></script>
+<script>
+// Check authentication on page load
+document.addEventListener('DOMContentLoaded', function() {
+    checkAuthentication();
+    loadUserData();
+    loadJobListings();
+});
+
+function checkAuthentication() {
+    if (!AuthManager.isAuthenticated()) {
+        AuthManager.redirectToLogin();
+        return;
+    }
+    
+    // User is authenticated, continue loading dashboard
+    const user = AuthManager.getUserInfo();
+    if (user) {
+        // Dashboard initialization - user greeting removed
+    }
+}
+
+function handleLogout() {
+    AuthManager.logout();
+}
+
+async function loadUserData() {
+    try {
+        const response = await AuthManager.apiCall(API_ENDPOINTS.profile);
+        
+        if (response && response.ok) {
+            const userData = await response.json();
+            // Update user info in localStorage with latest data
+            AuthManager.setAuthData(AuthManager.getToken(), userData);
+        }
+    } catch (error) {
+        console.error('Error loading user data:', error);
+    }
+}
+
+async function loadJobListings() {
+    try {
+        const response = await fetch(API_ENDPOINTS.jobs);
+        
+        if (response.ok) {
+            const jobs = await response.json();
+            displayJobListings(jobs);
+        } else {
+            document.getElementById('job-listings').innerHTML = '<p>Error loading job listings.</p>';
+        }
+    } catch (error) {
+        console.error('Error loading jobs:', error);
+        document.getElementById('job-listings').innerHTML = '<p>Error loading job listings.</p>';
+    }
+}
+
+function displayJobListings(jobs) {
+    const container = document.getElementById('job-listings');
+    
+    if (!jobs || jobs.length === 0) {
+        container.innerHTML = '<p>No job listings available at the moment.</p>';
+        return;
+    }
+    
+    // Display first 5 jobs
+    const jobsToShow = jobs.slice(0, 5);
+    container.innerHTML = jobsToShow.map(job => `
+        <div class="job-card">
+            <div>
+                <strong>${job.Title}</strong><br>
+                <span class="job-meta">${job.Location} · ${job.JobType || 'Full-Time'}</span>
+                <p>${job.Snippet || 'No description available.'}</p>
+                <a href="preview.html?jobId=${job.JobId}"><button>Apply</button></a>
+            </div>
+        </div>
+    `).join('');
+}
+</script>
+</body>
+</html>

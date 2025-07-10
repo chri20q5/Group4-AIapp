@@ -1,0 +1,18 @@
+{
+  "name": "AutoJob Frontend",
+  "description": "A modern job application platform with AI-powered cover letter generation",
+  "version": "1.0.0",
+  "main": "home.html",
+  "scripts": {
+    "start": "http-server -p 8080",
+    "build": "echo 'Static site - no build required'",
+    "deploy": "az webapp up --name autojob-frontend --resource-group your-resource-group"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  },
+  "keywords": ["jobs", "cover-letter", "ai", "azure", "frontend"],
+  "author": "Your Team",
+  "license": "MIT"
+}

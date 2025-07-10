@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Profile - AutoJob</title>
+    <link rel="stylesheet" href="style.css" />
+    <style>
+        body {
+            background: #f6f0fb;
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #444;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 4rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        h2 {
+            color: #7d5ba6;
+            margin-bottom: 1rem;
+        }
+
+        label {
+            display: block;
+            margin-top: 1rem;
+            font-weight: bold;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 0.6rem;
+            margin-top: 0.3rem;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+        }
+
+        .links {
+            margin-top: 2rem;
+        }
+
+        .links a {
+            display: inline-block;
+            margin-right: 1rem;
+            color: #6a4caf;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .button {
+            display: inline-block;
+            background: #bba4e3;
+            color: white;
+            padding: 0.6rem 1.2rem;
+            border-radius: 10px;
+            text-decoration: none;
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Your Profile</h2>
+    <div id="loading" style="text-align: center; padding: 2rem; display: none;">Loading profile...</div>
+    <div id="profile-form" style="display: none;">
+        <label for="firstName">First Name</label>
+        <input type="text" id="firstName" placeholder="First name" />
+
+        <label for="lastName">Last Name</label>
+        <input type="text" id="lastName" placeholder="Last name" />
+
+        <label for="email">Email</label>
+        <input type="email" id="email" placeholder="your@email.com" readonly style="background-color: #f5f5f5;" />
+
+        <label for="jobTitle">Job Title</label>
+        <input type="text" id="jobTitle" placeholder="Frontend Developer" />
+
+        <label for="location">Location</label>
+        <input type="text" id="location" placeholder="Berlin, Germany" />
+
+        <label for="aboutMe">About Me</label>
+        <textarea id="aboutMe" rows="4" placeholder="Write a short bio for your resume..."></textarea>
+
+        <button class="button" onclick="updateProfile()" style="margin-top: 1.5rem;">Save Changes</button>
+        <div id="success-message" style="color: green; margin-top: 1rem; display: none;"></div>
+        <div id="error-message" style="color: red; margin-top: 1rem; display: none;"></div>
+    </div>
+
+    <div class="links">
+        <a href="upload.html">Upload Resume</a>
+        <a href="preferences.html">Job Preferences</a>
+        <a href="dashboard.html">⬅ Back to Dashboard</a>
+    </div>
+</div>
+
+<script src="auth.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    if (!AuthManager.isAuthenticated()) {
+        AuthManager.redirectToLogin();
+        return;
+    }
+    
+    loadProfile();
+});
+
+async function loadProfile() {
+    const loadingDiv = document.getElementById('loading');
+    const formDiv = document.getElementById('profile-form');
+    
+    loadingDiv.style.display = 'block';
+    
+    try {
+        const response = await AuthManager.apiCall(API_ENDPOINTS.profile);
+        
+        if (response && response.ok) {
+            const userData = await response.json();
+            populateForm(userData);
+            formDiv.style.display = 'block';
+        } else {
+            showError('Failed to load profile data.');
+        }
+    } catch (error) {
+        console.error('Error loading profile:', error);
+        showError('Error loading profile. Please try again.');
+    } finally {
+        loadingDiv.style.display = 'none';
+    }
+}
+
+function populateForm(userData) {
+    document.getElementById('firstName').value = userData.FirstName || '';
+    document.getElementById('lastName').value = userData.LastName || '';
+    document.getElementById('email').value = userData.Email || '';
+    document.getElementById('jobTitle').value = userData.JobTitle || '';
+    document.getElementById('location').value = userData.Location || '';
+    document.getElementById('aboutMe').value = userData.AboutMe || '';
+}
+
+async function updateProfile() {
+    const errorDiv = document.getElementById('error-message');
+    const successDiv = document.getElementById('success-message');
+    
+    // Clear previous messages
+    errorDiv.style.display = 'none';
+    successDiv.style.display = 'none';
+    
+    const profileData = {
+        firstName: document.getElementById('firstName').value,
+        lastName: document.getElementById('lastName').value,
+        jobTitle: document.getElementById('jobTitle').value,
+        location: document.getElementById('location').value,
+        aboutMe: document.getElementById('aboutMe').value
+    };
+    
+    // Validate required fields
+    if (!profileData.firstName || !profileData.lastName) {
+        showError('First name and last name are required.');
+        return;
+    }
+    
+    try {
+        const response = await AuthManager.apiCall(API_ENDPOINTS.updateProfile, {
+            method: 'PUT',
+            body: JSON.stringify(profileData)
+        });
+        
+        if (response && response.ok) {
+            const result = await response.json();
+            if (result.success) {
+                showSuccess('Profile updated successfully!');
+                // Reload the profile to get updated data
+                await loadProfile();
+            } else {
+                showError(result.message || 'Failed to update profile.');
+            }
+        } else {
+            showError('Failed to update profile. Please try again.');
+        }
+    } catch (error) {
+        console.error('Error updating profile:', error);
+        showError('Error updating profile. Please try again.');
+    }
+}
+
+function showError(message) {
+    const errorDiv = document.getElementById('error-message');
+    errorDiv.textContent = message;
+    errorDiv.style.display = 'block';
+}
+
+function showSuccess(message) {
+    const successDiv = document.getElementById('success-message');
+    successDiv.textContent = message;
+    successDiv.style.display = 'block';
+}
+</script>
+</body>
+</html>

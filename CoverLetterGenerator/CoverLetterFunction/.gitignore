@@ -1,0 +1,56 @@
+# Azure Functions artifacts
+bin
+obj
+appsettings.json
+local.settings.json
+local.settings.*.json
+
+# Secrets and environment files
+*.secrets
+.env
+.env.local
+.env.production
+
+# Build outputs
+publish/
+*.zip
+function-app*.zip
+
+# Development database
+*.db
+*.sqlite
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+cover_letter.json
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/launch.json
+.idea/
+*.swp
+*.swo
+
+# Backup files
+*.bak
+
+# Azure Developer CLI
+.azure/
+
+# Node modules (if any JS tools are added)
+node_modules/
+
+# Test results
+TestResults/
+
+# Coverage reports
+*.coverage
+*.coveragexml

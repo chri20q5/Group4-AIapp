@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Register - AutoJob</title>
+    <link rel="stylesheet" href="style.css" />
+    <style>
+        body {
+            background: #f6f0fb;
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #444;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .container {
+            max-width: 400px;
+            width: 90%;
+            padding: 2rem;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+            text-align: center;
+        }
+
+        h2 {
+            color: #7d5ba6;
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-top: 1rem;
+            text-align: left;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.6rem;
+            margin-top: 0.3rem;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+        }
+
+        .button {
+            display: inline-block;
+            background: #bba4e3;
+            color: white;
+            padding: 0.6rem 1.2rem;
+            border-radius: 10px;
+            text-decoration: none;
+            margin-top: 1.5rem;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
+        }
+
+        .button:hover {
+            background: #a084d6;
+        }
+
+        .button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .back-link {
+            display: block;
+            margin-top: 1rem;
+            text-decoration: none;
+            color: #6a4caf;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Create Your Account</h2>
+    <label for="firstName">First Name</label>
+    <input type="text" id="firstName" placeholder="Your first name" />
+
+    <label for="lastName">Last Name</label>
+    <input type="text" id="lastName" placeholder="Your last name" />
+
+    <label for="email">Email</label>
+    <input type="email" id="email" placeholder="you@example.com" />
+
+    <label for="password">Password</label>
+    <input type="password" id="password" placeholder="Create a password" />
+
+    <label for="confirm">Confirm Password</label>
+    <input type="password" id="confirm" placeholder="Repeat your password" />
+
+    <br />
+    <button class="button" onclick="handleRegister()">Register</button>
+    <div id="error-message" style="color: red; margin-top: 1rem; display: none;"></div>
+    <div id="loading" style="margin-top: 1rem; display: none;">Creating account...</div>
+    <a class="back-link" href="home.html">⬅ Back to Home</a>
+    <p style="margin-top: 1rem; font-size: 0.9rem;">
+        Already have an account? <a href="login.html" style="color: #7d5ba6;">Sign in here</a>
+    </p>
+</div>
+
+<script src="auth.js"></script>
+<script>
+async function handleRegister() {
+    const firstName = document.getElementById('firstName').value;
+    const lastName = document.getElementById('lastName').value;
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const confirmPassword = document.getElementById('confirm').value;
+    const errorDiv = document.getElementById('error-message');
+    const loadingDiv = document.getElementById('loading');
+    
+    // Clear previous errors
+    errorDiv.style.display = 'none';
+    
+    // Validate input
+    if (!firstName || !lastName || !email || !password || !confirmPassword) {
+        showError('Please fill in all fields.');
+        return;
+    }
+    
+    if (password !== confirmPassword) {
+        showError('Passwords do not match.');
+        return;
+    }
+    
+    if (password.length < 8) {
+        showError('Password must be at least 8 characters long.');
+        return;
+    }
+    
+    // Show loading
+    loadingDiv.style.display = 'block';
+    
+    try {
+        const response = await fetch(API_ENDPOINTS.register, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                firstName: firstName,
+                lastName: lastName,
+                email: email,
+                password: password
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok && result.success) {
+            // Store the JWT token and user info
+            AuthManager.setAuthData(result.token, result.user);
+            
+            // Redirect to dashboard
+            window.location.href = 'dashboard.html';
+        } else {
+            showError(result.message || 'Registration failed. Please try again.');
+        }
+    } catch (error) {
+        showError('Network error. Please check your connection and try again.');
+        console.error('Registration error:', error);
+    } finally {
+        loadingDiv.style.display = 'none';
+    }
+}
+
+function showError(message) {
+    const errorDiv = document.getElementById('error-message');
+    errorDiv.textContent = message;
+    errorDiv.style.display = 'block';
+}
+
+// Allow Enter key to submit
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('confirm').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            handleRegister();
+        }
+    });
+});
+</script>
+</body>
+</html>

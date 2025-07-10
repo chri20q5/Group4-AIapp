@@ -1,0 +1,52 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
+
+name: cover-letter-generator
+metadata:
+  template: cover-letter-generator@0.0.1-beta
+  
+infra:
+  path: ./infra
+  module: main
+
+workflow:
+  run:
+    command: func start --port 7071
+    cwd: ./CoverLetterGenerator/CoverLetterFunction
+
+services:
+  CoverLetterFunction:
+    project: ./CoverLetterGenerator/CoverLetterFunction
+    language: dotnet
+    host: function
+  
+  frontend:
+    project: ./job-app-frontend
+    language: html
+    host: appservice
+
+hooks:
+  postprovision:
+    windows:
+      shell: pwsh
+      run: |
+        Write-Host "Infrastructure provisioned successfully!"
+        Write-Host "Function App: $env:AZURE_FUNCTION_APP_NAME"
+        Write-Host "Key Vault: $env:AZURE_KEY_VAULT_ENDPOINT"
+        Write-Host "Storage Account: $env:AZURE_STORAGE_ACCOUNT_NAME"
+        Write-Host ""
+        Write-Host "Next steps:"
+        Write-Host "1. Update your local.settings.json with Key Vault references"
+        Write-Host "2. Run 'azd deploy' to deploy the function code"
+        Write-Host "3. Test the API endpoints"
+    posix:
+      shell: sh
+      run: |
+        echo "Infrastructure provisioned successfully!"
+        echo "Function App: $AZURE_FUNCTION_APP_NAME"
+        echo "Key Vault: $AZURE_KEY_VAULT_ENDPOINT"
+        echo "Storage Account: $AZURE_STORAGE_ACCOUNT_NAME"
+        echo ""
+        echo "Next steps:"
+        echo "1. Update your local.settings.json with Key Vault references"
+        echo "2. Run 'azd deploy' to deploy the function code"
+        echo "3. Test the API endpoints"
