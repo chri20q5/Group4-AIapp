@@ -1,5 +1,4 @@
-// AutoJob Frontend - Azure Functions Integration
-// Connects the frontend to the Cover Letter Generator Azure Functions
+// AutoJob Frontend - Azure Functions Integra    // ====== API URL BUILDING WITH FUNCTION KEYS ======ects the frontend to the Cover Letter Generator Azure Functions
 
 class AutoJobApp {
     constructor() {
@@ -12,7 +11,7 @@ class AutoJobApp {
             apiBaseUrl: this.apiBaseUrl
         });
         
-        this.currentUser = this.getCurrentUser();
+        // Current user will be loaded from AuthManager when needed
         this.currentJob = null;
         
         // Pagination state for job listings
@@ -41,17 +40,6 @@ class AutoJobApp {
                 this.initProfile();
                 break;
         }
-    }
-
-    // ====== USER MANAGEMENT ======
-    getCurrentUser() {
-        // For now, return a demo user. In production, this would come from authentication
-        return {
-            name: "Christian",
-            email: "chri20q5@protonmail.com", 
-            location: "Munich, Germany",
-            profile: "I am a software engineer with 3 years of experience in web development, React, and cloud technologies. I'm passionate about creating user-friendly applications and have experience with Azure, Node.js, and modern web frameworks."
-        };
     }
 
     // ====== API URL BUILDING WITH FUNCTION KEYS ======
@@ -95,16 +83,31 @@ class AutoJobApp {
     async fetchJobById(jobId) {
         try {
             console.log('Fetching job by ID:', jobId);
-            const url = this.buildApiUrl(`jobs/${jobId}`);
-            const response = await fetch(url);
             
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+            // First try to find in cached jobs
+            const job = this.allJobs.find(j => j.JobId === parseInt(jobId));
+            if (job) {
+                console.log('Job found in cache:', job);
+                return job;
             }
             
-            const job = await response.json();
-            console.log('Job fetched:', job);
-            return job;
+            // If not in cache, fetch all jobs first
+            console.log('Job not in cache, fetching all jobs...');
+            const jobs = await this.fetchJobs();
+            
+            // Update our cache
+            this.allJobs = jobs;
+            
+            // Now find the job
+            const foundJob = jobs.find(j => j.JobId === parseInt(jobId));
+            console.log('Job fetched from API:', foundJob);
+            
+            if (!foundJob) {
+                console.error('Job not found with ID:', jobId);
+                console.log('Available jobs:', jobs.map(j => ({ id: j.JobId, title: j.Title })));
+            }
+            
+            return foundJob;
         } catch (error) {
             console.error('Error fetching job:', error);
             return null;
@@ -113,27 +116,34 @@ class AutoJobApp {
 
     async generateCoverLetter(jobId, userProfile = null) {
         try {
-            const profile = userProfile || this.currentUser.profile;
             console.log('Generating cover letter for job:', jobId);
+            console.log('Auth token:', AuthManager.getToken() ? 'Present' : 'Missing');
+            console.log('User info:', AuthManager.getUserInfo());
             
-            const url = this.buildApiUrl('GenerateCoverLetterFromJob');
-            const response = await fetch(url, {
+            const response = await AuthManager.apiCall(API_ENDPOINTS.generateCoverLetter, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    jobId: parseInt(jobId),
-                    customUserProfile: `Name: ${this.currentUser.name}, Email: ${this.currentUser.email}, Location: ${this.currentUser.location}. ${profile}`
+                    jobId: parseInt(jobId)
                 })
             });
 
+            console.log('Response received:', response);
+
+            if (!response) {
+                throw new Error('No response received (likely authentication issue)');
+            }
+
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                const errorText = await response.text();
+                console.error('API Error Response:', errorText);
+                throw new Error(`HTTP error! status: ${response.status}, body: ${errorText}`);
             }
 
             const result = await response.json();
-            console.log('Cover letter generated:', result);
+            console.log('Cover letter generated successfully:', result);
             return result;
         } catch (error) {
             console.error('Error generating cover letter:', error);
@@ -152,6 +162,12 @@ class AutoJobApp {
         if (!jobsContainer || jobsContainer.textContent !== 'Job Listings') return;
 
         const card = jobsContainer.parentElement;
+        const jobListingsDiv = document.getElementById('job-listings');
+        
+        // Clear the loading message and any existing content
+        if (jobListingsDiv) {
+            jobListingsDiv.innerHTML = '';
+        }
         
         // Show loading state
         const existingJobs = card.querySelectorAll('.job-card');
@@ -180,23 +196,23 @@ class AutoJobApp {
 
     displayMoreJobs(card) {
         const jobsToShow = this.allJobs.slice(this.displayedJobsCount, this.displayedJobsCount + this.jobsPerPage);
+        const jobListingsDiv = document.getElementById('job-listings');
         
-        // Add job cards
+        // Add job cards to the job-listings div
         jobsToShow.forEach(job => {
             const jobCard = this.createJobCard(job);
-            // Insert before the load more button if it exists, otherwise append
-            const loadMoreBtn = card.querySelector('.load-more-btn');
-            if (loadMoreBtn) {
-                card.insertBefore(jobCard, loadMoreBtn);
+            if (jobListingsDiv) {
+                jobListingsDiv.appendChild(jobCard);
             } else {
+                // Fallback: add to card if job-listings div not found
                 card.appendChild(jobCard);
             }
         });
         
         this.displayedJobsCount += jobsToShow.length;
         
-        // Add or update "Load More" button
-        this.updateLoadMoreButton(card);
+        // Add or update "Load More" button in the job-listings div
+        this.updateLoadMoreButton(jobListingsDiv || card);
     }
 
     updateLoadMoreButton(card) {
@@ -233,7 +249,7 @@ class AutoJobApp {
                 <strong>${job.Title}</strong><br>
                 <span class="job-meta">${job.Location} · ${job.Type || 'Full-Time'}</span>
                 <p>${job.Snippet ? job.Snippet.substring(0, 150) + '...' : 'No description available'}</p>
-                <button onclick="autoJob.applyToJob(${job.JobId})" class="apply-btn">Apply</button>
+                <button onclick="applyToJob(${job.JobId})" class="apply-btn">Apply</button>
             </div>
         `;
         return jobCard;
@@ -241,11 +257,17 @@ class AutoJobApp {
 
     // ====== JOB APPLICATION FLOW ======
     async applyToJob(jobId) {
-        console.log('Applying to job:', jobId);
+        console.log('=== APPLY TO JOB DEBUG ===');
+        console.log('Applying to job:', jobId, 'Type:', typeof jobId);
+        console.log('Current URL:', window.location.href);
+        console.log('LocalStorage before storing:', Object.keys(localStorage));
         
         try {
             // Store job ID and redirect to preview
-            localStorage.setItem('applyingJobId', jobId);
+            localStorage.setItem('applyingJobId', jobId.toString());
+            console.log('Stored job ID in localStorage:', localStorage.getItem('applyingJobId'));
+            console.log('LocalStorage after storing:', Object.keys(localStorage));
+            console.log('About to redirect to preview.html');
             window.location.href = 'preview.html';
         } catch (error) {
             console.error('Error applying to job:', error);
@@ -255,10 +277,32 @@ class AutoJobApp {
 
     // ====== PREVIEW PAGE ======
     async initPreview() {
+        console.log('=== PREVIEW PAGE DEBUG ===');
         console.log('Initializing preview page...');
+        console.log('Current URL:', window.location.href);
+        console.log('All localStorage items:', Object.keys(localStorage));
         
-        const jobId = localStorage.getItem('applyingJobId');
+        // Check for job ID in localStorage first
+        let jobId = localStorage.getItem('applyingJobId');
+        console.log('Job ID from localStorage:', jobId);
+        
+        // If not in localStorage, check URL parameters
         if (!jobId) {
+            const urlParams = new URLSearchParams(window.location.search);
+            jobId = urlParams.get('jobId');
+            console.log('Job ID from URL params:', jobId);
+            
+            // If we got it from URL, store it in localStorage for consistency
+            if (jobId) {
+                localStorage.setItem('applyingJobId', jobId);
+                console.log('Stored job ID from URL to localStorage:', jobId);
+            }
+        }
+        
+        if (!jobId) {
+            console.error('No job ID found in localStorage or URL parameters');
+            console.log('Available localStorage keys:', Object.keys(localStorage));
+            console.log('URL search params:', window.location.search);
             this.showError('No job selected. Redirecting to dashboard...');
             setTimeout(() => window.location.href = 'dashboard.html', 2000);
             return;
@@ -302,10 +346,14 @@ class AutoJobApp {
             textarea.value = result.coverLetter || 'Cover letter generated successfully!';
             textarea.style.background = 'white';
             
-            // Store for confirmation page
+            // Store for confirmation page - using the format expected by sendApplication
             localStorage.setItem('generatedCoverLetter', JSON.stringify({
-                job: job,
                 coverLetter: result.coverLetter,
+                userName: result.userName,
+                userEmail: result.userEmail,
+                jobTitle: result.jobTitle,
+                companyName: result.companyName,
+                job: job, // Keep for backward compatibility
                 timestamp: new Date().toISOString()
             }));
             
@@ -334,7 +382,7 @@ class AutoJobApp {
             }
 
             const coverLetterData = JSON.parse(storedData);
-            if (!coverLetterData.coverLetter || !coverLetterData.job) {
+            if (!coverLetterData.coverLetter) {
                 this.showError('Invalid cover letter data. Please regenerate the cover letter.');
                 return;
             }
@@ -350,10 +398,10 @@ class AutoJobApp {
             // Prepare email data - send TO the hiring manager (you)
             const emailData = {
                 Email: "chri20q5@protonmail.com", // Always send to you as the hiring manager
-                Name: this.currentUser.name, // Applicant name for the email subject/content
+                Name: coverLetterData.userName, // Applicant name from the authenticated user
                 CoverLetter: coverLetterData.coverLetter,
-                JobTitle: coverLetterData.job.Title,
-                CompanyName: coverLetterData.job.CompanyName
+                JobTitle: coverLetterData.jobTitle,
+                CompanyName: coverLetterData.companyName || "Company"
             };
 
             // Send email
@@ -448,6 +496,28 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Global functions for inline event handlers
-window.applyToJob = (jobId) => window.autoJob.applyToJob(jobId);
-window.sendApplication = () => window.autoJob.sendApplication();
-window.loadMoreJobs = () => window.autoJob.loadMoreJobs();
+window.applyToJob = (jobId) => {
+    console.log('Global applyToJob called with:', jobId);
+    if (window.autoJob) {
+        return window.autoJob.applyToJob(jobId);
+    } else {
+        console.error('AutoJob not initialized yet');
+        alert('Application is still loading. Please try again in a moment.');
+    }
+};
+window.sendApplication = () => {
+    if (window.autoJob) {
+        return window.autoJob.sendApplication();
+    } else {
+        console.error('AutoJob not initialized yet');
+        alert('Application is still loading. Please try again in a moment.');
+    }
+};
+window.loadMoreJobs = () => {
+    if (window.autoJob) {
+        return window.autoJob.loadMoreJobs();
+    } else {
+        console.error('AutoJob not initialized yet');
+        alert('Application is still loading. Please try again in a moment.');
+    }
+};

@@ -209,12 +209,22 @@ public class GenerateCoverLetterFunction
 
         try
         {
+            // Validate JWT token and extract user ID
+            var userId = ExtractUserIdFromRequest(req);
+            
+            if (userId == null)
+            {
+                var unauthorizedResponse = req.CreateResponse(HttpStatusCode.Unauthorized);
+                await unauthorizedResponse.WriteStringAsync("Valid authentication token required.");
+                return unauthorizedResponse;
+            }
+
             string? requestBody = await req.ReadAsStringAsync();
             
             if (string.IsNullOrEmpty(requestBody))
             {
                 var badRequestResponse = req.CreateResponse(HttpStatusCode.BadRequest);
-                await badRequestResponse.WriteStringAsync("Request body is required and should include jobId and userEmail or applicantId.");
+                await badRequestResponse.WriteStringAsync("Request body is required and should include jobId.");
                 return badRequestResponse;
             }
 
@@ -239,48 +249,61 @@ public class GenerateCoverLetterFunction
                 return notFoundResponse;
             }
 
-            // Get user profile
-            string userProfile = "";
-            if (!string.IsNullOrEmpty(data.UserEmail))
+            // Get authenticated user's profile
+            var applicant = await _databaseService.GetApplicantByIdAsync(userId.Value);
+            if (applicant == null)
             {
-                var applicant = await _databaseService.GetApplicantByEmailAsync(data.UserEmail);
-                if (applicant != null)
-                {
-                    userProfile = $"Name: {applicant.FirstName} {applicant.LastName}, Email: {applicant.Email}";
-                    if (!string.IsNullOrEmpty(applicant.Location))
-                    {
-                        userProfile += $", Location: {applicant.Location}";
-                    }
-                }
-            }
-            else if (data.ApplicantId.HasValue)
-            {
-                var applicant = await _databaseService.GetApplicantByIdAsync(data.ApplicantId.Value);
-                if (applicant != null)
-                {
-                    userProfile = $"Name: {applicant.FirstName} {applicant.LastName}, Email: {applicant.Email}";
-                    if (!string.IsNullOrEmpty(applicant.Location))
-                    {
-                        userProfile += $", Location: {applicant.Location}";
-                    }
-                }
+                var notFoundResponse = req.CreateResponse(HttpStatusCode.NotFound);
+                await notFoundResponse.WriteStringAsync("User profile not found.");
+                return notFoundResponse;
             }
 
-            if (string.IsNullOrEmpty(userProfile))
+            // Build comprehensive user profile for cover letter generation
+            string userProfile = "Professional seeking new opportunities";
+            
+            if (!string.IsNullOrEmpty(applicant.FirstName) && !string.IsNullOrEmpty(applicant.LastName))
             {
-                userProfile = data.CustomUserProfile ?? "Professional seeking opportunities";
+                userProfile = $"Name: {applicant.FirstName} {applicant.LastName}";
+            }
+            
+            if (!string.IsNullOrEmpty(applicant.Location))
+            {
+                userProfile += $", Location: {applicant.Location}";
+            }
+            
+            if (!string.IsNullOrEmpty(applicant.JobTitle))
+            {
+                userProfile += $", Current Position: {applicant.JobTitle}";
+            }
+            
+            if (!string.IsNullOrEmpty(applicant.AboutMe))
+            {
+                userProfile += $"\n\nAbout Me: {applicant.AboutMe}";
+            }
+            
+            if (!string.IsNullOrEmpty(applicant.JobPreferences))
+            {
+                userProfile += $"\n\nJob Preferences: {applicant.JobPreferences}";
             }
 
             // Create job description from job data
             string jobDescription = $"Job Title: {job.Title}";
+            
             if (!string.IsNullOrEmpty(job.Location))
             {
                 jobDescription += $", Location: {job.Location}";
             }
+            
             if (!string.IsNullOrEmpty(job.Salary))
             {
                 jobDescription += $", Salary: {job.Salary}";
             }
+            
+            if (!string.IsNullOrEmpty(job.Source))
+            {
+                jobDescription += $", Company: {job.Source}";
+            }
+            
             if (!string.IsNullOrEmpty(job.Snippet))
             {
                 jobDescription += $"\n\nJob Description: {job.Snippet}";
@@ -293,6 +316,9 @@ public class GenerateCoverLetterFunction
                 coverLetter, 
                 jobTitle = job.Title,
                 jobLocation = job.Location,
+                companyName = job.Source,
+                userName = $"{applicant.FirstName} {applicant.LastName}",
+                userEmail = applicant.Email,
                 userProfile 
             });
             return response;
@@ -784,9 +810,6 @@ public class GenerateCoverLetterFunction
     public class CoverLetterFromJobRequest
     {
         public int JobId { get; set; }
-        public string? UserEmail { get; set; }
-        public int? ApplicantId { get; set; }
-        public string? CustomUserProfile { get; set; }
     }
 
     public class CoverLetterRequest

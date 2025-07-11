@@ -58,6 +58,27 @@ namespace CoverLetterFunction.Services
             if (string.IsNullOrEmpty(coverLetterContent))
                 return coverLetterContent;
 
+            // First, remove any bracketed placeholders completely
+            var result = System.Text.RegularExpressions.Regex.Replace(coverLetterContent, @"\[.*?\]", "");
+            
+            // Remove "Dear Hiring Manager," from the beginning since it's already in the email template
+            result = System.Text.RegularExpressions.Regex.Replace(result, @"^\s*Dear\s+Hiring\s+Manager,?\s*\n?", "", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            
+            // Remove fake company names and locations that AI might invent
+            var fakeCompanyPatterns = new[]
+            {
+                @"NPL Construction \(S4\)",
+                @"at [A-Z][a-zA-Z\s&]+ in [A-Z][a-zA-Z\s,]+",
+                @"Berlin, Connecticut",
+                @"Mr\.\s+Christopher\s+McGee",
+                @"position at [A-Z][a-zA-Z\s&]+\s+in\s+[A-Z][a-zA-Z\s,]+"
+            };
+            
+            foreach (var pattern in fakeCompanyPatterns)
+            {
+                result = System.Text.RegularExpressions.Regex.Replace(result, pattern, "the position", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            }
+            
             // Remove common AI-generated formatting instructions and template text
             var linesToRemove = new[]
             {
@@ -67,17 +88,22 @@ namespace CoverLetterFunction.Services
                 "incorporating her profile", 
                 "aiming for a formal and professional tone",
                 "---",
-                "[your address - optional]",
-                "[date]",
-                "[hiring manager name",
-                "[company name]",
-                "[company address]",
-                "[mr./ms./mx. hiring manager",
+                "your address - optional",
+                "date",
+                "hiring manager name",
+                "company name",
+                "company address",
+                "mr./ms./mx. hiring manager",
                 "if known, otherwise use",
-                "as advertised"
+                "as advertised",
+                "where you saw the job posting",
+                "platform where you saw",
+                "e.g., linkedin",
+                "e.g., matlab",
+                "e.g., simul"
             };
 
-            var lines = coverLetterContent.Split('\n');
+            var lines = result.Split('\n');
             var cleanedLines = new List<string>();
 
             foreach (var line in lines)
@@ -96,6 +122,10 @@ namespace CoverLetterFunction.Services
                 if (cleanLine == "---" || cleanLine.All(c => c == '-' || c == ' '))
                     shouldSkip = true;
                 
+                // Skip lines that still contain brackets or template text
+                if (cleanLine.Contains("[") || cleanLine.Contains("]"))
+                    shouldSkip = true;
+                
                 if (!shouldSkip)
                 {
                     cleanedLines.Add(line); // Keep original formatting
@@ -103,12 +133,27 @@ namespace CoverLetterFunction.Services
             }
 
             // Join lines back together and ensure proper spacing
-            var result = string.Join("\n", cleanedLines);
+            result = string.Join("\n", cleanedLines);
             
             // Remove multiple consecutive newlines
             while (result.Contains("\n\n\n"))
             {
                 result = result.Replace("\n\n\n", "\n\n");
+            }
+            
+            // Final cleanup: remove any remaining bracketed text
+            result = System.Text.RegularExpressions.Regex.Replace(result, @"\[.*?\]", "");
+            
+            // Clean up any double spaces left by bracket removal
+            while (result.Contains("  "))
+            {
+                result = result.Replace("  ", " ");
+            }
+            
+            // If the content seems incomplete (ends abruptly), add a professional closing
+            if (!string.IsNullOrEmpty(result) && !result.TrimEnd().EndsWith(".") && !result.TrimEnd().EndsWith("!"))
+            {
+                result = result.TrimEnd() + ".";
             }
             
             return result.Trim();

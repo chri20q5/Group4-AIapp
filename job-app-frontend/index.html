@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Portal - Redirecting...</title>
+    <script>
+        // Check if user is authenticated, then redirect appropriately
+        const token = localStorage.getItem('authToken');
+        if (token) {
+            // User is authenticated, redirect to dashboard
+            window.location.href = 'dashboard.html';
+        } else {
+            // User is not authenticated, redirect to login
+            window.location.href = 'login.html';
+        }
+    </script>
+</head>
+<body>
+    <p>Redirecting...</p>
+</body>
+</html>

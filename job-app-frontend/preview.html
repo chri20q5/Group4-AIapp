@@ -5,6 +5,7 @@
     <title>Cover Letter Preview - AutoJob</title>
     <link rel="stylesheet" href="style.css" />
     <script src="config.js"></script>
+    <script src="auth.js"></script>
     <script src="app.js"></script>
     <style>
         body {
@@ -67,5 +68,14 @@
     <a class="button" href="#" onclick="sendApplication(); return false;">Send Application</a>
     <a class="button cancel" href="dashboard.html">Never mind</a>
 </div>
+
+<script>
+    // Debug script to check what's happening on page load
+    console.log('Preview page loaded');
+    console.log('Job ID from localStorage:', localStorage.getItem('applyingJobId'));
+    console.log('Auth token:', localStorage.getItem('authToken'));
+    console.log('Current URL:', window.location.href);
+    console.log('All localStorage items:', Object.keys(localStorage));
+</script>
 </body>
 </html>

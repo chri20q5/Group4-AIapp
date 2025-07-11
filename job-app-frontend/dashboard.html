@@ -181,7 +181,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     checkAuthentication();
     loadUserData();
-    loadJobListings();
+    // loadJobListings(); // Now handled by app.js - AutoJobApp class
 });
 
 function checkAuthentication() {
@@ -215,6 +215,9 @@ async function loadUserData() {
     }
 }
 
+// Job listings are now handled by app.js - AutoJobApp class
+// The following functions are commented out to prevent conflicts:
+/*
 async function loadJobListings() {
     try {
         const response = await fetch(API_ENDPOINTS.jobs);
@@ -252,6 +255,7 @@ function displayJobListings(jobs) {
         </div>
     `).join('');
 }
+*/
 </script>
 </body>
 </html>
